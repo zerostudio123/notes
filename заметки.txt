@@ -1,0 +1,115 @@
+using Microsoft.SqlServer.Server;
+using System;
+using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.Diagnostics;
+using System.Dynamic;
+using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Mail;
+using System.Runtime.InteropServices;
+using System.Security.Authentication;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Schema;
+
+namespace ConsoleApp1
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            string[] countTasks = { };
+            string[] emptyArray = { };
+            bool isWork = true;
+            while (isWork)
+            {
+                int y = 0;
+                Console.SetCursorPosition(0, 20);
+                Console.WriteLine("1. записать задачу\n2.показать в обратном порядке\n3.очистить заметки\n4.Остортировать в алфавитном порядке\n5.выйти\n6.удаление конкретной заметки");
+                Console.SetCursorPosition(75, 0);
+                for (int i = 0; i < countTasks.Length; i++)
+                {
+                    Console.SetCursorPosition(75, y);
+                    Console.Write($"{i+1}.{countTasks[i]}");
+                    y++;
+
+                }
+                Console.SetCursorPosition(0, 0);
+                switch (Convert.ToInt32(Console.ReadLine()))
+                {
+                    case 1:
+                        string newTask;
+                        Console.Write("Введите заметку: ");
+                        newTask = Console.ReadLine();
+                        string[] addingTask = new string[countTasks.Length + 1];
+                        for (int i = 0; i < countTasks.Length; i++)
+                        {
+                            addingTask[i] = countTasks[i];
+                        }
+                        addingTask[addingTask.Length - 1] = newTask;
+                        countTasks = addingTask;
+                        break;
+
+                    case 2:
+                        string[] reverseList = new string[countTasks.Length];
+                        for (int i = 0; i < reverseList.Length; i++)
+                        {
+                            reverseList[i] = countTasks[i];
+                        }
+                        Array.Reverse(reverseList);
+                        for (int i = 0; i < reverseList.Length; i++)
+                        {
+                            Console.WriteLine(reverseList[i]);
+                        }
+                        break;
+                    case 3:
+                        countTasks = emptyArray;
+                        break;
+                    case 4:
+                        string[] cloneCountTasks = new string[countTasks.Length];
+                        for (int i = 0; i < cloneCountTasks.Length; i++)
+                        {
+                            cloneCountTasks[i] = countTasks[i];
+                        }
+                        Array.Sort(cloneCountTasks);
+                        for (int i = 0; i < cloneCountTasks.Length; i++)
+                        {
+                            Console.WriteLine(cloneCountTasks[i]);
+                        }
+                        break;
+                    case 5:
+                        isWork = false;
+                        break;
+                    case 6:
+                        Console.Write("Введите номер заметки: ");
+                        int indicator = Convert.ToInt32(Console.ReadLine()) - 1;
+                        if (indicator < countTasks.Length && indicator >= 0)
+                        {
+                            int index = 0;
+                            Array.Clear(countTasks, indicator, 1);
+                            string[] reducedClone = new string[countTasks.Length - 1];
+                            for (int i = 0; i < countTasks.Length; i++)
+                            {
+                                if (countTasks[i] != null)
+                                {
+                                    reducedClone[index] = countTasks[i];
+                                    index++;
+                                }
+                            }
+                            countTasks = reducedClone;
+                        }
+                        break;
+                }
+                if (isWork)
+                {
+                    Console.WriteLine("Введите клавишу");
+                    Console.ReadKey();
+                }
+                Console.Clear();
+            }
+        }
+    }
+}
+
