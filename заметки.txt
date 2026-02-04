@@ -1,17 +1,28 @@
+using Microsoft.CSharp.RuntimeBinder;
 using Microsoft.SqlServer.Server;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Eventing.Reader;
 using System.Dynamic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Mail;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Security.Authentication;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using System.Xml.Schema;
 
 namespace ConsoleApp1
@@ -20,96 +31,117 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            string[] countTasks = { };
-            string[] emptyArray = { };
             bool isWork = true;
+            List<string> notes = new List<string>();
             while (isWork)
             {
-                int y = 0;
-                Console.SetCursorPosition(0, 20);
-                Console.WriteLine("1. записать задачу\n2.показать в обратном порядке\n3.очистить заметки\n4.Остортировать в алфавитном порядке\n5.выйти\n6.удаление конкретной заметки");
-                Console.SetCursorPosition(75, 0);
-                for (int i = 0; i < countTasks.Length; i++)
-                {
-                    Console.SetCursorPosition(75, y);
-                    Console.Write($"{i+1}.{countTasks[i]}");
-                    y++;
-
-                }
+                ShowList(notes);
+                CalledNotes();
                 Console.SetCursorPosition(0, 0);
-                switch (Convert.ToInt32(Console.ReadLine()))
+
+                int choiseOperstion = ChekedNumber("Введите номер операции: ");
+                switch (choiseOperstion)
                 {
                     case 1:
-                        string newTask;
-                        Console.Write("Введите заметку: ");
-                        newTask = Console.ReadLine();
-                        string[] addingTask = new string[countTasks.Length + 1];
-                        for (int i = 0; i < countTasks.Length; i++)
-                        {
-                            addingTask[i] = countTasks[i];
-                        }
-                        addingTask[addingTask.Length - 1] = newTask;
-                        countTasks = addingTask;
+                        addList(ref notes);
                         break;
-
                     case 2:
-                        string[] reverseList = new string[countTasks.Length];
-                        for (int i = 0; i < reverseList.Length; i++)
-                        {
-                            reverseList[i] = countTasks[i];
-                        }
-                        Array.Reverse(reverseList);
-                        for (int i = 0; i < reverseList.Length; i++)
-                        {
-                            Console.WriteLine(reverseList[i]);
-                        }
+                        reverseList(notes);
                         break;
                     case 3:
-                        countTasks = emptyArray;
+                        ClearList(ref notes);
                         break;
                     case 4:
-                        string[] cloneCountTasks = new string[countTasks.Length];
-                        for (int i = 0; i < cloneCountTasks.Length; i++)
-                        {
-                            cloneCountTasks[i] = countTasks[i];
-                        }
-                        Array.Sort(cloneCountTasks);
-                        for (int i = 0; i < cloneCountTasks.Length; i++)
-                        {
-                            Console.WriteLine(cloneCountTasks[i]);
-                        }
+                        SortList(notes);
                         break;
                     case 5:
                         isWork = false;
                         break;
                     case 6:
-                        Console.Write("Введите номер заметки: ");
-                        int indicator = Convert.ToInt32(Console.ReadLine()) - 1;
-                        if (indicator < countTasks.Length && indicator >= 0)
-                        {
-                            int index = 0;
-                            Array.Clear(countTasks, indicator, 1);
-                            string[] reducedClone = new string[countTasks.Length - 1];
-                            for (int i = 0; i < countTasks.Length; i++)
-                            {
-                                if (countTasks[i] != null)
-                                {
-                                    reducedClone[index] = countTasks[i];
-                                    index++;
-                                }
-                            }
-                            countTasks = reducedClone;
-                        }
+                        DeleteConcertin(ref notes);
                         break;
                 }
                 if (isWork)
                 {
-                    Console.WriteLine("Введите клавишу");
-                    Console.ReadKey();
+                    Console.WriteLine("Введите Enter: ");
+                    Console.ReadLine();
                 }
                 Console.Clear();
             }
         }
+        private static void CalledNotes()
+        {
+            Console.SetCursorPosition(0, 20);
+            menu();
+        }
+        private static void ShowList(List<string> notes)
+        {
+            for (int i = 0; i < notes.Count; i++)
+            {
+                Console.SetCursorPosition(30, i);
+                Console.WriteLine((i + 1) + " " + notes[i]);
+            }
+        }
+        private static void addList(ref List<string> notes)
+        {
+            string input = Console.ReadLine();
+            notes.Add(input);
+        }
+        private static void ClearList(ref List<string> notes)
+        {
+            notes.Clear();
+        }
+        private static void SortList(List<string> notes)
+        {
+            List<string> notesClone = new List<string>(notes);
+            notesClone.Sort();
+            for (int i = 0; i < notesClone.Count; i++)
+            {
+                Console.WriteLine(((notesClone.Count - i)) + " " + notesClone[i]);
+            }
+        }
+        private static void DeleteConcertin(ref List<string> notes)
+        {
+            int notesNumber = ChekedNumber("Введите номер заметки: ");
+            if (notesNumber > 0 && notesNumber <= notes.Count)
+            {
+                notes.RemoveAt(notesNumber - 1);
+            }
+        }
+        private static void reverseList(List<string> notes)
+        {
+            List<string> notesReverseClone = new List<string>(notes);
+
+            notesReverseClone.Reverse();
+            for (int i = 0; i < notesReverseClone.Count; i++)
+            {
+                Console.WriteLine(((notesReverseClone.Count - i)) + " " + notesReverseClone[i]);
+            }
+        }
+        private static void menu()
+        {
+            Console.WriteLine("1 - добавить заметку");
+            Console.WriteLine("2 - показать в обратном порядку");
+            Console.WriteLine("3 - очистить заметки");
+            Console.WriteLine("4 - отсортировать в алфавитном порядке");
+            Console.WriteLine("5 - выход");
+            Console.WriteLine("6 - удаление конркетной заметки");
+        }
+        private static int ChekedNumber(string massage)
+        {
+            int num = 0;
+            while (true)
+            {
+                Console.Write(massage);
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out int resul))
+                {
+                    num = resul;
+                    break;
+                }
+                Console.WriteLine("Некоректный ввод");
+            }
+            return num;
+        }
     }
 }
-
